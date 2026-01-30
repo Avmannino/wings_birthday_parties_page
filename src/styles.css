@@ -293,17 +293,15 @@ body {
   line-height: 1.55;
 }
 
-/* ✅ REAL FIX: remove backdrop-filter and make the card more opaque */
+/* ✅ card */
 .formCard {
   margin-top: 16px;
-  background: rgba(18, 24, 40, 0.92); /* more opaque, no bright band */
+  background: rgba(18, 24, 40, 0.92);
   border: 1px solid var(--stroke);
   border-radius: var(--radius);
   padding: 22px;
   box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
   overflow: hidden;
-
-  /* ✅ explicitly disable any blur sampling */
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -315,10 +313,12 @@ body {
   gap: 14px;
 }
 
+/* ✅ NEW: desktop grid with a button "cell" */
 @media (min-width: 900px) {
-  .grid {
+  .gridWithButton {
     grid-template-columns: 1fr 1fr;
     gap: 16px;
+    align-items: end; /* so the button sits nicely in the empty area */
   }
 }
 
@@ -357,7 +357,20 @@ body {
   font-size: 12px;
 }
 
-/* form footer row */
+/* ✅ NEW: button placement in the red-circle spot */
+.submitSlot {
+  display: flex;
+  justify-content: center; /* centered within that right-column empty space */
+  align-items: center;
+  min-height: 56px; /* gives the area some structure */
+}
+
+.btnSubmitInGrid {
+  width: 100%;
+  max-width: 360px; /* keeps it from going too huge in wide layouts */
+}
+
+/* form footer row (text only now) */
 .actions {
   margin-top: 18px;
   display: flex;
@@ -365,19 +378,8 @@ body {
   gap: 18px;
 }
 
-.actionsLeft {
+.actionsNoButton .actionsLeft {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.actionsRight {
-  margin-left: auto;
-  display: flex;
-  justify-content: flex-end;
-  align-items: flex-end;
-  flex-shrink: 0;
 }
 
 .hint,
@@ -416,20 +418,15 @@ body {
   color: var(--success);
 }
 
-/* Mobile */
+/* Mobile: keep the submit button full-width BELOW the fields */
 @media (max-width: 899px) {
-  .actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .actionsRight {
+  .submitSlot {
     justify-content: stretch;
   }
 
-  .btnSubmit {
+  .btnSubmitInGrid {
     width: 100%;
-    min-width: 0;
+    max-width: none;
   }
 
   .reviewsInner {

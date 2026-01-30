@@ -99,13 +99,8 @@ export default function App() {
     setStatus({ type: "idle", message: "" });
 
     try {
-      /**
-       * ✅ Formspree recommended: send JSON + Accept header
-       * Note: Formspree returns 200/302 typically; we handle non-OK.
-       */
       const payload = {
         ...form,
-        // helpful for email subject/routing inside Formspree
         _subject: `Birthday Party Request: ${form.firstName} ${form.lastName} (${form.preferredDate})`,
         _replyto: form.email,
         source: "Wings Arena Birthday Parties Form",
@@ -123,7 +118,6 @@ export default function App() {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // Formspree often returns { errors: [...] } or { error: ... }
         const msg =
           data?.error ||
           (Array.isArray(data?.errors) && data.errors[0]?.message) ||
@@ -235,7 +229,8 @@ export default function App() {
 
           <div className="formCard">
             <form className="form" onSubmit={onSubmit} noValidate>
-              <div className="grid">
+              {/* ✅ NEW: grid now includes a button "cell" in the red-circle spot */}
+              <div className="grid gridWithButton">
                 <Field
                   label="First Name"
                   name="firstName"
@@ -301,6 +296,7 @@ export default function App() {
                   placeholder="e.g. 15"
                 />
 
+                {/* left column (same row as the button on desktop) */}
                 <Field
                   label="Estimated Skate Rentals"
                   name="estSkateRentals"
@@ -312,9 +308,17 @@ export default function App() {
                   min="0"
                   placeholder="e.g. 10"
                 />
+
+                {/* ✅ NEW: button positioned in the "red circle" spot */}
+                <div className="submitSlot" aria-label="Submit request">
+                  <button className="btnPrimary btnSubmit btnSubmitInGrid" type="submit" disabled={isSubmitting}>
+                    {isSubmitting ? "Sending..." : "Submit Request"}
+                  </button>
+                </div>
               </div>
 
-              <div className="actions">
+              {/* ✅ footer row now only contains the left-side text/status */}
+              <div className="actions actionsNoButton">
                 <div className="actionsLeft">
                   {status.type !== "idle" ? (
                     <p className={`status ${status.type === "error" ? "statusError" : "statusSuccess"}`}>
@@ -331,12 +335,6 @@ export default function App() {
                       </p>
                     </>
                   )}
-                </div>
-
-                <div className="actionsRight">
-                  <button className="btnPrimary btnSubmit" type="submit" disabled={isSubmitting}>
-                    {isSubmitting ? "Sending..." : "Submit Request"}
-                  </button>
                 </div>
               </div>
             </form>
