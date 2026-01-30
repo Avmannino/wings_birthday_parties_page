@@ -411,7 +411,7 @@ export default function App() {
 
           <p className="questionsBelow">
             Questions? Reach out to our Program Director, Joe at{" "}
-            <a className="emailLink" href="mailto:jwanderlingh@wingsarena.com">
+            <a className="emailLink" href="mailto:amannino@wingsarena.com">
               jwanderlingh@wingsarena.com
             </a>
           </p>
