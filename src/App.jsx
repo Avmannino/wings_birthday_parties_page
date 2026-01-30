@@ -1,10 +1,16 @@
 // src/App.jsx
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import logo from "./assets/logo.png";
 import heroImg from "./assets/flow-room.jpg";
 
 // ✅ Add a reviews background image (put a file at: src/assets/reviews-bg.jpg)
 import reviewsBg from "./assets/reviews-bg.jpg";
+
+// ✅ NEW: gallery images (add these files to src/assets/gallery/)
+import gallery1 from "./assets/gallery/gallery-1.jpg";
+import gallery2 from "./assets/gallery/gallery-2.jpg";
+import gallery3 from "./assets/gallery/gallery-3.jpg";
+import gallery4 from "./assets/gallery/gallery-4.jpg";
 
 /**
  * ✅ Formspree
@@ -21,6 +27,7 @@ const initialForm = {
   preferredDate: "",
   estPeople: "",
   estSkateRentals: "",
+  partyFocus: "", // ✅ NEW: "Hockey" | "Just Skating" | "Both"
 };
 
 function isValidEmail(email) {
@@ -32,6 +39,18 @@ export default function App() {
   const [touched, setTouched] = useState({});
   const [status, setStatus] = useState({ type: "idle", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // ✅ NEW: rotating gallery state
+  const gallery = useMemo(() => [gallery1, gallery2, gallery3, gallery4], []);
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  // ✅ NEW: auto-rotate (every 4 seconds)
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveSlide((i) => (i + 1) % gallery.length);
+    }, 4000);
+    return () => clearInterval(id);
+  }, [gallery.length]);
 
   const errors = useMemo(() => {
     const e = {};
@@ -49,6 +68,8 @@ export default function App() {
       e.estPeople = "Must be 0 or more.";
     if (form.estSkateRentals !== "" && Number(form.estSkateRentals) < 0)
       e.estSkateRentals = "Must be 0 or more.";
+
+    // partyFocus is optional (no validation)
 
     return e;
   }, [form]);
@@ -68,6 +89,15 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  // ✅ Single-select "checkboxes" behavior:
+  // clicking a different one selects it, clicking the selected one clears it
+  function togglePartyFocus(value) {
+    setForm((prev) => ({
+      ...prev,
+      partyFocus: prev.partyFocus === value ? "" : value,
+    }));
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
 
@@ -79,6 +109,7 @@ export default function App() {
       preferredDate: true,
       estPeople: true,
       estSkateRentals: true,
+      partyFocus: true,
     });
 
     if (hasErrors) {
@@ -222,14 +253,16 @@ export default function App() {
         <section className="formSection" id="start-planning" aria-label="Start planning form">
           <div className="formHeader">
             <h2 className="formTitle">Start Planning</h2>
+
             <p className="formNote">
               Our Program Director, Joe will reach out to you with pricing options and availability.
             </p>
+
+            <p className="formHint">We typically respond within 24-48 hours.</p>
           </div>
 
           <div className="formCard">
             <form className="form" onSubmit={onSubmit} noValidate>
-              {/* ✅ NEW: grid now includes a button "cell" in the red-circle spot */}
               <div className="grid gridWithButton">
                 <Field
                   label="First Name"
@@ -296,7 +329,6 @@ export default function App() {
                   placeholder="e.g. 15"
                 />
 
-                {/* left column (same row as the button on desktop) */}
                 <Field
                   label="Estimated Skate Rentals"
                   name="estSkateRentals"
@@ -309,35 +341,85 @@ export default function App() {
                   placeholder="e.g. 10"
                 />
 
-                {/* ✅ NEW: button positioned in the "red circle" spot */}
+                <div className="partyFocus" role="group" aria-label="Party focus selection">
+                  <p className="partyFocusQ">
+                    What would you like your party to be primarily geared towards?
+                  </p>
+
+                  <div className="partyFocusOptions">
+                    <label className="checkItem">
+                      <input
+                        type="checkbox"
+                        checked={form.partyFocus === "Hockey"}
+                        onChange={() => togglePartyFocus("Hockey")}
+                      />
+                      <span>Hockey</span>
+                    </label>
+
+                    <label className="checkItem">
+                      <input
+                        type="checkbox"
+                        checked={form.partyFocus === "Just Skating"}
+                        onChange={() => togglePartyFocus("Just Skating")}
+                      />
+                      <span>Just Skating</span>
+                    </label>
+
+                    <label className="checkItem">
+                      <input
+                        type="checkbox"
+                        checked={form.partyFocus === "Both"}
+                        onChange={() => togglePartyFocus("Both")}
+                      />
+                      <span>Both</span>
+                    </label>
+                  </div>
+
+                  <p className="partyFocusHint">(This helps us recommend the best setup for your party)</p>
+                </div>
+
                 <div className="submitSlot" aria-label="Submit request">
-                  <button className="btnPrimary btnSubmit btnSubmitInGrid" type="submit" disabled={isSubmitting}>
+                  <button
+                    className="btnPrimary btnSubmit btnSubmitInGrid"
+                    type="submit"
+                    disabled={isSubmitting}
+                  >
                     {isSubmitting ? "Sending..." : "Submit Request"}
                   </button>
                 </div>
               </div>
 
-              {/* ✅ footer row now only contains the left-side text/status */}
               <div className="actions actionsNoButton">
                 <div className="actionsLeft">
                   {status.type !== "idle" ? (
                     <p className={`status ${status.type === "error" ? "statusError" : "statusSuccess"}`}>
                       {status.message}
                     </p>
-                  ) : (
-                    <>
-                      <p className="hint">We typically respond within 1–2 business days.</p>
-                      <p className="questions">
-                        Questions? Reach out to our Program Director, Joe at{" "}
-                        <a className="emailLink" href="mailto:jwanderlingh@wingsarena.com">
-                          jwanderlingh@wingsarena.com
-                        </a>
-                      </p>
-                    </>
-                  )}
+                  ) : null}
                 </div>
               </div>
             </form>
+          </div>
+
+          <p className="questionsBelow">
+            Questions? Reach out to our Program Director, Joe at{" "}
+            <a className="emailLink" href="mailto:jwanderlingh@wingsarena.com">
+              jwanderlingh@wingsarena.com
+            </a>
+          </p>
+
+          {/* ✅ NEW: Rotating image gallery (under Questions...) */}
+          <div className="rotatingGallery" aria-label="Wings Arena gallery">
+            {gallery.map((src, idx) => (
+              <img
+                key={src}
+                className={`galleryImg ${idx === activeSlide ? "isActive" : ""}`}
+                src={src}
+                alt=""
+                loading="lazy"
+                aria-hidden={idx !== activeSlide}
+              />
+            ))}
           </div>
         </section>
       </main>
@@ -349,18 +431,7 @@ export default function App() {
   );
 }
 
-function Field({
-  label,
-  name,
-  type = "text",
-  value,
-  onChange,
-  onBlur,
-  error,
-  placeholder,
-  autoComplete,
-  min,
-}) {
+function Field({ label, name, type = "text", value, onChange, onBlur, error, placeholder, autoComplete, min }) {
   const describedBy = error ? `${name}-error` : undefined;
 
   return (
