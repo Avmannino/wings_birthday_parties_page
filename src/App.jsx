@@ -27,7 +27,7 @@ const initialForm = {
   preferredDate: "",
   estPeople: "",
   estSkateRentals: "",
-  partyFocus: "", // ✅ NEW: "Hockey" | "Just Skating" | "Both"
+  partyFocus: "", // ✅ "Hockey" | "Just Skating" | "Both"
 };
 
 function isValidEmail(email) {
@@ -40,11 +40,11 @@ export default function App() {
   const [status, setStatus] = useState({ type: "idle", message: "" });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // ✅ NEW: rotating gallery state
+  // ✅ Rotating gallery state
   const gallery = useMemo(() => [gallery1, gallery2, gallery3, gallery4], []);
   const [activeSlide, setActiveSlide] = useState(0);
 
-  // ✅ NEW: auto-rotate (every 4 seconds)
+  // ✅ Auto-rotate (every 4 seconds)
   useEffect(() => {
     const id = setInterval(() => {
       setActiveSlide((i) => (i + 1) % gallery.length);
@@ -64,12 +64,9 @@ export default function App() {
     if (!form.phone.trim()) e.phone = "Phone number is required.";
     if (!form.preferredDate) e.preferredDate = "Please choose a preferred date.";
 
-    if (form.estPeople !== "" && Number(form.estPeople) < 0)
-      e.estPeople = "Must be 0 or more.";
+    if (form.estPeople !== "" && Number(form.estPeople) < 0) e.estPeople = "Must be 0 or more.";
     if (form.estSkateRentals !== "" && Number(form.estSkateRentals) < 0)
       e.estSkateRentals = "Must be 0 or more.";
-
-    // partyFocus is optional (no validation)
 
     return e;
   }, [form]);
@@ -89,8 +86,13 @@ export default function App() {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
-  // ✅ Single-select "checkboxes" behavior:
-  // clicking a different one selects it, clicking the selected one clears it
+  // ✅ NEW: scroll to gallery anchor
+  function scrollToGallery() {
+    const el = document.getElementById("see-our-space");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  // ✅ Single-select "checkboxes" behavior
   function togglePartyFocus(value) {
     setForm((prev) => ({
       ...prev,
@@ -185,18 +187,23 @@ export default function App() {
           <h1 className="heroTitle">Birthday Parties</h1>
 
           <p className="heroBody">
-            Make your next birthday one to remember—celebrate at Wings Arena with a party
-            that’s equal parts fun and easy. Our birthday party packages give you dedicated
-            space for food, cake, and presents, plus plenty of ice time for the kids to skate,
-            play, and burn off energy. Whether it’s their first time on skates or they’re
-            already flying around the rink, our team helps keep everything running smoothly so
-            you can enjoy the day without the stress. Pick a date, bring the candles, and let
-            Wings Arena handle the rest—a birthday on the ice is always a win.
+            Make your next birthday one to remember—celebrate at Wings Arena with a party that’s equal
+            parts fun and easy. Our birthday party packages give you dedicated space for food, cake,
+            and presents, plus plenty of ice time for the kids to skate, play, and burn off energy.
+            Whether it’s their first time on skates or they’re already flying around the rink, our
+            team helps keep everything running smoothly so you can enjoy the day without the stress.
+            Pick a date, bring the candles, and let Wings Arena handle the rest—a birthday on the ice
+            is always a win.
           </p>
 
           <div className="heroActions">
             <button className="btnPrimary" type="button" onClick={scrollToForm}>
               Start Planning
+            </button>
+
+            {/* ✅ NEW: sits to the right of Start Planning */}
+            <button className="btnSecondary" type="button" onClick={scrollToGallery}>
+              See Our Space
             </button>
           </div>
         </div>
@@ -244,7 +251,8 @@ export default function App() {
 
           <div className="reviewsInner">
             <blockquote className="reviewQuote">
-              “Great communication from start to finish, awesome energy from the staff, and a super memorable birthday for our kid—everything felt organized, easy, and genuinely fun for the whole group.”
+              “Great communication from start to finish, awesome energy from the staff, and a super memorable
+              birthday for our kid—everything felt organized, easy, and genuinely fun for the whole group.”
             </blockquote>
             <div className="reviewBy">-Nicolas | Greenwich, CT</div>
           </div>
@@ -375,7 +383,7 @@ export default function App() {
                     </label>
                   </div>
 
-                  <p className="partyFocusHint">(This helps us recommend the best setup for your party)</p>
+                  <p className="partyFocusHint">(This helps us provide the best setup for your party)</p>
                 </div>
 
                 <div className="submitSlot" aria-label="Submit request">
@@ -408,8 +416,8 @@ export default function App() {
             </a>
           </p>
 
-          {/* ✅ NEW: Rotating image gallery (under Questions...) */}
-          <div className="rotatingGallery" aria-label="Wings Arena gallery">
+          {/* ✅ Rotating image gallery (anchor target) */}
+          <div className="rotatingGallery" id="see-our-space" aria-label="Wings Arena gallery">
             {gallery.map((src, idx) => (
               <img
                 key={src}
