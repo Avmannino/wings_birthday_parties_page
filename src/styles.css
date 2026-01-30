@@ -138,6 +138,8 @@ body {
     font-size: 16px;
     min-width: 220px;
     border-radius: 18px;
+    margin-top: 10px;
+    margin-bottom: -15px;
   }
 }
 
