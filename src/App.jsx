@@ -17,7 +17,7 @@ import gallery4 from "./assets/gallery/gallery-4.jpg";
  * 1) Create a form in Formspree and copy your endpoint URL.
  * 2) Paste it here (it looks like: https://formspree.io/f/xxxxxxxx)
  */
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/xreklooq";
+const FORMSPREE_ENDPOINT = "https://formspree.io/f/xnjvldba";
 
 const initialForm = {
   firstName: "",
@@ -470,4 +470,4 @@ function Field({ label, name, type = "text", value, onChange, onBlur, error, pla
       ) : null}
     </div>
   );
-}
+}y
