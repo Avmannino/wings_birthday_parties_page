@@ -14,10 +14,17 @@ import gallery4 from "./assets/gallery/gallery-4.jpg";
 
 /**
  * ✅ Formspree
- * 1) Create a form in Formspree and copy your endpoint URL.
- * 2) Paste it here (it looks like: https://formspree.io/f/xxxxxxxx)
+ * Use Vite env vars:
+ * - VITE_FORMSPREE_ENDPOINT
+ * - VITE_FORMSPREE_CC (optional)
+ *
+ * For GitHub Pages / production builds, commit a .env.production file (see steps below).
  */
-const FORMSPREE_ENDPOINT = "https://formspree.io/f/xnjvldba";
+const FORMSPREE_ENDPOINT = (
+  import.meta.env.VITE_FORMSPREE_ENDPOINT || "https://formspree.io/f/xnjvldba"
+).trim();
+
+const FORMSPREE_CC = (import.meta.env.VITE_FORMSPREE_CC || "").trim();
 
 const initialForm = {
   firstName: "",
@@ -123,7 +130,7 @@ export default function App() {
       setStatus({
         type: "error",
         message:
-          "Form submit is not configured yet. Paste your Formspree endpoint into FORMSPREE_ENDPOINT.",
+          "Form submit is not configured yet. Set VITE_FORMSPREE_ENDPOINT (recommended: in .env.production for GH Pages).",
       });
       return;
     }
@@ -136,6 +143,7 @@ export default function App() {
         ...form,
         _subject: `Birthday Party Request: ${form.firstName} ${form.lastName} (${form.preferredDate})`,
         _replyto: form.email,
+        ...(FORMSPREE_CC ? { _cc: FORMSPREE_CC } : {}),
         source: "Wings Arena Birthday Parties Form",
       };
 
@@ -411,7 +419,7 @@ export default function App() {
 
           <p className="questionsBelow">
             Questions? Reach out to our Program Director, Joe at{" "}
-            <a className="emailLink" href="mailto:amannino@wingsarena.com">
+            <a className="emailLink" href="mailto:jwanderlingh@wingsarena.com">
               jwanderlingh@wingsarena.com
             </a>
           </p>
@@ -470,4 +478,4 @@ function Field({ label, name, type = "text", value, onChange, onBlur, error, pla
       ) : null}
     </div>
   );
-}y
+}
