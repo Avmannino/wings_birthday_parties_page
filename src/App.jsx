@@ -21,7 +21,7 @@ import gallery4 from "./assets/gallery/gallery-4.jpg";
  * For GitHub Pages / production builds, commit a .env.production file (see steps below).
  */
 const FORMSPREE_ENDPOINT = (
-  import.meta.env.VITE_FORMSPREE_ENDPOINT || "https://formspree.io/f/xnjvldba"
+  import.meta.env.VITE_FORMSPREE_ENDPOINT || "https://formspree.io/f/xreklooq"
 ).trim();
 
 const FORMSPREE_CC = (import.meta.env.VITE_FORMSPREE_CC || "").trim();
