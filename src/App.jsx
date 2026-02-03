@@ -13,18 +13,15 @@ import gallery3 from "./assets/gallery/gallery-3.jpg";
 import gallery4 from "./assets/gallery/gallery-4.jpg";
 
 /**
- * ✅ Formspree
- * Use Vite env vars:
- * - VITE_FORMSPREE_ENDPOINT
- * - VITE_FORMSPREE_CC (optional)
+ * ✅ Web3Forms (frontend-only)
+ * Env vars (Vite):
+ * - VITE_WEB3FORMS_ACCESS_KEY
  *
- * For GitHub Pages / production builds, commit a .env.production file (see steps below).
+ * Endpoint:
+ * - https://api.web3forms.com/submit
  */
-const FORMSPREE_ENDPOINT = (
-  import.meta.env.VITE_FORMSPREE_ENDPOINT || "https://formspree.io/f/xreklooq"
-).trim();
-
-const FORMSPREE_CC = (import.meta.env.VITE_FORMSPREE_CC || "").trim();
+const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
+const WEB3FORMS_ACCESS_KEY = (import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "").trim();
 
 const initialForm = {
   firstName: "",
@@ -126,11 +123,12 @@ export default function App() {
       return;
     }
 
-    if (!FORMSPREE_ENDPOINT || FORMSPREE_ENDPOINT.includes("YOUR_FORM_ID")) {
+    // ✅ Web3Forms key required
+    if (!WEB3FORMS_ACCESS_KEY) {
       setStatus({
         type: "error",
         message:
-          "Form submit is not configured yet. Set VITE_FORMSPREE_ENDPOINT (recommended: in .env.production for GH Pages).",
+          "Form submit is not configured yet. Set VITE_WEB3FORMS_ACCESS_KEY (recommended: in .env.production for GH Pages).",
       });
       return;
     }
@@ -140,14 +138,26 @@ export default function App() {
 
     try {
       const payload = {
-        ...form,
-        _subject: `Birthday Party Request: ${form.firstName} ${form.lastName} (${form.preferredDate})`,
-        _replyto: form.email,
-        ...(FORMSPREE_CC ? { _cc: FORMSPREE_CC } : {}),
+        access_key: WEB3FORMS_ACCESS_KEY,
+
+        // Email metadata
+        subject: `Birthday Party Request: ${form.firstName} ${form.lastName} (${form.preferredDate})`,
+        from_name: "Wings Arena Birthday Parties",
+        replyto: form.email,
+
+        // Form fields (included in the email)
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        phone: form.phone,
+        preferredDate: form.preferredDate,
+        estPeople: form.estPeople,
+        estSkateRentals: form.estSkateRentals,
+        partyFocus: form.partyFocus,
         source: "Wings Arena Birthday Parties Form",
       };
 
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      const res = await fetch(WEB3FORMS_ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -158,12 +168,9 @@ export default function App() {
 
       const data = await res.json().catch(() => ({}));
 
-      if (!res.ok) {
-        const msg =
-          data?.error ||
-          (Array.isArray(data?.errors) && data.errors[0]?.message) ||
-          "Request failed. Please try again.";
-        throw new Error(msg);
+      // Web3Forms: data.success true/false
+      if (!res.ok || data?.success === false) {
+        throw new Error(data?.message || data?.error || "Request failed. Please try again.");
       }
 
       setStatus({
@@ -270,9 +277,7 @@ export default function App() {
           <div className="formHeader">
             <h2 className="formTitle">Start Planning</h2>
 
-            <p className="formNote">
-              Our Program Director, Joe will reach out to you with pricing options and availability.
-            </p>
+            <p className="formNote">Our Program Director, Joe will reach out to you with pricing options and availability.</p>
 
             <p className="formHint">We typically respond within 24-48 hours.</p>
           </div>
@@ -358,9 +363,7 @@ export default function App() {
                 />
 
                 <div className="partyFocus" role="group" aria-label="Party focus selection">
-                  <p className="partyFocusQ">
-                    What would you like your party to be primarily geared towards?
-                  </p>
+                  <p className="partyFocusQ">What would you like your party to be primarily geared towards?</p>
 
                   <div className="partyFocusOptions">
                     <label className="checkItem">
@@ -395,11 +398,7 @@ export default function App() {
                 </div>
 
                 <div className="submitSlot" aria-label="Submit request">
-                  <button
-                    className="btnPrimary btnSubmit btnSubmitInGrid"
-                    type="submit"
-                    disabled={isSubmitting}
-                  >
+                  <button className="btnPrimary btnSubmit btnSubmitInGrid" type="submit" disabled={isSubmitting}>
                     {isSubmitting ? "Sending..." : "Submit Request"}
                   </button>
                 </div>
@@ -447,7 +446,18 @@ export default function App() {
   );
 }
 
-function Field({ label, name, type = "text", value, onChange, onBlur, error, placeholder, autoComplete, min }) {
+function Field({
+  label,
+  name,
+  type = "text",
+  value,
+  onChange,
+  onBlur,
+  error,
+  placeholder,
+  autoComplete,
+  min,
+}) {
   const describedBy = error ? `${name}-error` : undefined;
 
   return (
