@@ -23,6 +23,15 @@ import gallery4 from "./assets/gallery/gallery-4.jpg";
 const WEB3FORMS_ENDPOINT = "https://api.web3forms.com/submit";
 const WEB3FORMS_ACCESS_KEY = (import.meta.env.VITE_WEB3FORMS_ACCESS_KEY || "").trim();
 
+// ✅ Dropdown options (now includes "Other" as 5th option)
+const HEAR_ABOUT_OPTIONS = [
+  "Google / Search",
+  "Social media (Instagram/Facebook/TikTok)",
+  "Friend / Family referral",
+  "Wings Arena website / Email / Newsletter",
+  "Other",
+];
+
 const initialForm = {
   firstName: "",
   lastName: "",
@@ -31,6 +40,8 @@ const initialForm = {
   preferredDate: "",
   estPeople: "",
   estSkateRentals: "",
+  heardAboutUs: "", // ✅ required dropdown
+  heardAboutUsOther: "", // ✅ required only when heardAboutUs === "Other"
   partyFocus: "", // ✅ "Hockey" | "Just Skating" | "Both"
 };
 
@@ -72,6 +83,14 @@ export default function App() {
     if (form.estSkateRentals !== "" && Number(form.estSkateRentals) < 0)
       e.estSkateRentals = "Must be 0 or more.";
 
+    // ✅ required dropdown validation
+    if (!form.heardAboutUs.trim()) e.heardAboutUs = "Please select an option.";
+
+    // ✅ if "Other" selected, require the follow-up input
+    if (form.heardAboutUs === "Other" && !form.heardAboutUsOther.trim()) {
+      e.heardAboutUsOther = "Please tell us how you heard about us.";
+    }
+
     return e;
   }, [form]);
 
@@ -104,6 +123,15 @@ export default function App() {
     }));
   }
 
+  // ✅ NEW: handle dropdown change so "Other" input resets when not needed
+  function onHeardAboutChange(value) {
+    setForm((prev) => ({
+      ...prev,
+      heardAboutUs: value,
+      heardAboutUsOther: value === "Other" ? prev.heardAboutUsOther : "",
+    }));
+  }
+
   async function onSubmit(e) {
     e.preventDefault();
 
@@ -115,6 +143,8 @@ export default function App() {
       preferredDate: true,
       estPeople: true,
       estSkateRentals: true,
+      heardAboutUs: true,
+      heardAboutUsOther: true, // ✅ NEW (only errors if Other is selected)
       partyFocus: true,
     });
 
@@ -137,6 +167,11 @@ export default function App() {
     setStatus({ type: "idle", message: "" });
 
     try {
+      const heardAboutFinal =
+        form.heardAboutUs === "Other"
+          ? `Other: ${form.heardAboutUsOther.trim()}`
+          : form.heardAboutUs;
+
       const payload = {
         access_key: WEB3FORMS_ACCESS_KEY,
 
@@ -153,6 +188,12 @@ export default function App() {
         preferredDate: form.preferredDate,
         estPeople: form.estPeople,
         estSkateRentals: form.estSkateRentals,
+
+        // ✅ NEW: forwarded through email (both raw + combined)
+        heardAboutUs: form.heardAboutUs,
+        heardAboutUsOther: form.heardAboutUsOther,
+        heardAboutUsFinal: heardAboutFinal,
+
         partyFocus: form.partyFocus,
         source: "Wings Arena Birthday Parties Form",
       };
@@ -277,7 +318,9 @@ export default function App() {
           <div className="formHeader">
             <h2 className="formTitle">Start Planning</h2>
 
-            <p className="formNote">Our Program Director, Joe will reach out to you with pricing options and availability.</p>
+            <p className="formNote">
+              Our Program Director, Joe will reach out to you with pricing options and availability.
+            </p>
 
             <p className="formHint">We typically respond within 24-48 hours.</p>
           </div>
@@ -361,6 +404,31 @@ export default function App() {
                   min="0"
                   placeholder="e.g. 10"
                 />
+
+                {/* ✅ How did you hear about us? */}
+                <SelectField
+                  label="How did you hear about us?"
+                  name="heardAboutUs"
+                  value={form.heardAboutUs}
+                  onChange={(name, value) => onHeardAboutChange(value)}
+                  onBlur={onBlur}
+                  error={touched.heardAboutUs ? errors.heardAboutUs : ""}
+                  options={HEAR_ABOUT_OPTIONS}
+                  placeholder="Select one..."
+                />
+
+                {/* ✅ NEW: only shows when "Other" is selected (and becomes required) */}
+                {form.heardAboutUs === "Other" ? (
+                  <Field
+                    label="Please specify"
+                    name="heardAboutUsOther"
+                    value={form.heardAboutUsOther}
+                    onChange={updateField}
+                    onBlur={onBlur}
+                    error={touched.heardAboutUsOther ? errors.heardAboutUsOther : ""}
+                    placeholder="Type your answer..."
+                  />
+                ) : null}
 
                 <div className="partyFocus" role="group" aria-label="Party focus selection">
                   <p className="partyFocusQ">What would you like your party to be primarily geared towards?</p>
@@ -480,6 +548,42 @@ function Field({
         aria-invalid={!!error}
         aria-describedby={describedBy}
       />
+
+      {error ? (
+        <div className="error" id={`${name}-error`}>
+          {error}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function SelectField({ label, name, value, onChange, onBlur, error, options, placeholder = "Select..." }) {
+  const describedBy = error ? `${name}-error` : undefined;
+
+  return (
+    <div className="field">
+      <label className="label" htmlFor={name}>
+        {label}
+      </label>
+
+      <select
+        id={name}
+        name={name}
+        className={`input ${error ? "inputError" : ""}`}
+        value={value}
+        onChange={(e) => onChange(name, e.target.value)}
+        onBlur={() => onBlur(name)}
+        aria-invalid={!!error}
+        aria-describedby={describedBy}
+      >
+        <option value="">{placeholder}</option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>
 
       {error ? (
         <div className="error" id={`${name}-error`}>

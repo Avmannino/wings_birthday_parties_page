@@ -353,6 +353,20 @@ body {
   gap: 14px;
 }
 
+/* ✅ Dropdown (select) control background */
+select.input {
+  background: rgba(255, 255, 255, 0.08);
+  /* <-- change this */
+}
+
+/* ✅ Dropdown menu (the opened list) background + text */
+select.input option {
+  background-color: #0b1224;
+  /* <-- change this (menu background) */
+  color: rgba(255, 255, 255, 0.92);
+}
+
+
 /* desktop grid with a button "cell" */
 @media (min-width: 900px) {
   .gridWithButton {
