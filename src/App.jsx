@@ -7,10 +7,10 @@ import heroImg from "./assets/flow-room.jpg";
 import reviewsBg from "./assets/reviews-bg.jpg";
 
 // ✅ NEW: gallery images (add these files to src/assets/gallery/)
-import gallery1 from "./assets/gallery/gallery-1.jpg";
-import gallery2 from "./assets/gallery/gallery-2.jpg";
-import gallery3 from "./assets/gallery/gallery-3.jpg";
-import gallery4 from "./assets/gallery/gallery-4.jpg";
+import gallery1 from "./assets/gallery/gallery-1.jpeg";
+import gallery2 from "./assets/gallery/gallery-2.jpeg";
+import gallery3 from "./assets/gallery/gallery-3.jpeg";
+
 
 /**
  * ✅ Web3Forms (frontend-only)
@@ -56,7 +56,7 @@ export default function App() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ✅ Rotating gallery state
-  const gallery = useMemo(() => [gallery1, gallery2, gallery3, gallery4], []);
+  const gallery = useMemo(() => [gallery1, gallery2, gallery3], []);
   const [activeSlide, setActiveSlide] = useState(0);
 
   // ✅ Auto-rotate (every 4 seconds)
